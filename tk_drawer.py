@@ -51,6 +51,18 @@ class TkDrawer:
         self.canvas.create_line(x(p), y(p), x(q), y(q), fill="black", width=2)
         self.root.update()
 
+    # Рисование доп. линии
+    def draw_grey_line(self, p, q):
+        self.canvas.create_line(x(p), y(p), x(q), y(q), fill="grey", width=1)
+        self.root.update()
+
+    # Рисование доп. окружности
+    def draw_circle(self, p, r):
+        r *= SCALE
+        self.canvas.create_oval(
+            x(p)-r, y(p)-r, x(p)+r, y(p)+r, fill="lightgray", width=0)
+        self.root.update()
+
 
 if __name__ == "__main__":
 

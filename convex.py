@@ -5,11 +5,25 @@ from r2point import R2Point
 class Figure:
     """ Абстрактная фигура """
 
-    def perimeter(self):
-        return 0.0
+    def __init__(self):
+        self._cnt = 0
 
-    def area(self):
-        return 0.0
+    def get_cnt(self):
+        return self._cnt
+
+    @staticmethod
+    def check_dot(a):
+        if 1 < a.x < 2 and 1 < a.y < 2:
+            return False
+        if a.x > 4 or a.x < -1 or a.y > 4 or a.y < -1:
+            return False
+        if min(a.dist(R2Point(0, 0)), a.dist(R2Point(0, 3)),
+               a.dist(R2Point(3, 0)), a.dist(R2Point(3, 3))) <= 1:
+            return True
+        if a.x < 0 and a.y < 0 or a.x < 0 and a.y > 3 or \
+           a.x > 3 and a.y < 0 or a.x > 3 and a.y > 3:
+            return False
+        return True
 
 
 class Void(Figure):
@@ -24,6 +38,7 @@ class Point(Figure):
 
     def __init__(self, p):
         self.p = p
+        self._cnt = 1*Figure.check_dot(p)
 
     def add(self, q):
         return self if self.p == q else Segment(self.p, q)
@@ -34,9 +49,7 @@ class Segment(Figure):
 
     def __init__(self, p, q):
         self.p, self.q = p, q
-
-    def perimeter(self):
-        return 2.0 * self.p.dist(self.q)
+        self._cnt = 1*Figure.check_dot(p) + 1*Figure.check_dot(q)
 
     def add(self, r):
         if R2Point.is_triangle(self.p, self.q, r):
@@ -61,14 +74,8 @@ class Polygon(Figure):
         else:
             self.points.push_last(a)
             self.points.push_first(c)
-        self._perimeter = a.dist(b) + b.dist(c) + c.dist(a)
-        self._area = abs(R2Point.area(a, b, c))
-
-    def perimeter(self):
-        return self._perimeter
-
-    def area(self):
-        return self._area
+        self._cnt = (1*Figure.check_dot(a) +
+                     1*Figure.check_dot(b) + 1*Figure.check_dot(c))
 
     # добавление новой точки
     def add(self, t):
@@ -82,31 +89,22 @@ class Polygon(Figure):
         # хотя бы одно освещённое ребро есть
         if t.is_light(self.points.last(), self.points.first()):
 
-            # учёт удаления ребра, соединяющего конец и начало дека
-            self._perimeter -= self.points.first().dist(self.points.last())
-            self._area += abs(R2Point.area(t,
-                                           self.points.last(),
-                                           self.points.first()))
-
             # удаление освещённых рёбер из начала дека
             p = self.points.pop_first()
             while t.is_light(p, self.points.first()):
-                self._perimeter -= p.dist(self.points.first())
-                self._area += abs(R2Point.area(t, p, self.points.first()))
+                self._cnt -= 1*Figure.check_dot(p)
                 p = self.points.pop_first()
             self.points.push_first(p)
 
             # удаление освещённых рёбер из конца дека
             p = self.points.pop_last()
             while t.is_light(self.points.last(), p):
-                self._perimeter -= p.dist(self.points.last())
-                self._area += abs(R2Point.area(t, p, self.points.last()))
+                self._cnt -= 1*Figure.check_dot(p)
                 p = self.points.pop_last()
             self.points.push_last(p)
 
-            # добавление двух новых рёбер
-            self._perimeter += t.dist(self.points.first()) + \
-                t.dist(self.points.last())
+            # добавление новой точки
+            self._cnt += 1*Figure.check_dot(t)
             self.points.push_first(t)
 
         return self

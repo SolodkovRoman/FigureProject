@@ -18,20 +18,16 @@ class TestVoid:
     def test_void(self):
         assert isinstance(self.f, Void)
 
-    # Периметр нульугольника нулевой
-    def test_perimeter(self):
-        assert self.f.perimeter() == 0.0
-
-    # Площадь нульугольника нулевая
-    def test_area(self):
-        assert self.f.area() == 0.0
+    # Кол-во нужных точек у нульугольника равно 0
+    def test_cnt(self):
+        assert self.f.get_cnt() == 0
 
     # При добавлении точки нульугольник превращается в одноугольник
     def test_add(self):
         assert isinstance(self.f.add(R2Point(0.0, 0.0)), Point)
 
 
-class TestPoint:
+class TestPoint1:
 
     # Инициализация (выполняется для каждого из тестов класса)
     def setup_method(self):
@@ -45,17 +41,40 @@ class TestPoint:
     def test_point(self):
         assert isinstance(self.f, Point)
 
-    # Периметр одноугольника нулевой
-    def test_perimeter(self):
-        assert self.f.perimeter() == 0.0
-
-    # Площадь одноугольника нулевая
-    def test_area(self):
-        assert self.f.area() == 0.0
+    # Кол-во нужных точек у этого одноугольника равно 1
+    def test_cnt(self):
+        assert self.f.get_cnt() == 1
 
     # При добавлении точки одноугольник может не измениться
     def test_add1(self):
         assert self.f.add(R2Point(0.0, 0.0)) is self.f
+
+    # При добавлении точки одноугольник может превратиться в двуугольник
+    def test_add2(self):
+        assert isinstance(self.f.add(R2Point(1.0, 0.0)), Segment)
+
+
+class TestPoint2:
+
+    # Инициализация (выполняется для каждого из тестов класса)
+    def setup_method(self):
+        self.f = Point(R2Point(-4.0, 0.0))
+
+    # Одноугольник является фигурой
+    def test_figure(self):
+        assert isinstance(self.f, Figure)
+
+    # Конструктор порождает экземпляр класса Point (одноугольник)
+    def test_point(self):
+        assert isinstance(self.f, Point)
+
+    # Кол-во нужных точек у этого одноугольника равно 0
+    def test_cnt(self):
+        assert self.f.get_cnt() == 0
+
+    # При добавлении точки одноугольник может не измениться
+    def test_add1(self):
+        assert self.f.add(R2Point(-4.0, 0.0)) is self.f
 
     # При добавлении точки одноугольник может превратиться в двуугольник
     def test_add2(self):
@@ -76,13 +95,9 @@ class TestSegment:
     def test_segment(self):
         assert isinstance(self.f, Segment)
 
-    # Периметр двуугольника равен удвоенной длине отрезка
-    def test_perimeter(self):
-        assert self.f.perimeter() == approx(2.0)
-
-    # Площадь двуугольника нулевая
-    def test_area(self):
-        assert self.f.area() == 0.0
+    # Кол-во нужных точек у этого двугольника равно 2
+    def test_cnt(self):
+        assert self.f.get_cnt() == 2
 
     # При добавлении точки двуугольник может не измениться
     def test_add1(self):
@@ -90,21 +105,21 @@ class TestSegment:
 
     # Он не изменяется в том случае, когда добавляемая точка совпадает
     # с одним из концов отрезка
-    def test_add1(self):
+    def test_add2(self):
         assert self.f.add(R2Point(0.0, 0.0)) is self.f
 
     # При добавлении точки правее двуугольник может превратиться в другой
     # двуугольник
-    def test_add2(self):
+    def test_add3(self):
         assert isinstance(self.f.add(R2Point(2.0, 0.0)), Segment)
 
     # При добавлении точки левее двуугольник может превратиться в другой
     # двуугольник
-    def test_add3(self):
+    def test_add4(self):
         assert isinstance(self.f.add(R2Point(-1.0, 0.0)), Segment)
 
     # При добавлении точки двуугольник может превратиться в треугольник
-    def test_add4(self):
+    def test_add5(self):
         assert isinstance(self.f.add(R2Point(0.0, 1.0)), Polygon)
 
 
@@ -160,20 +175,32 @@ class TestPolygon:
                                 0.8)).points.size() == 7
         assert self.f.add(R2Point(2.0, 2.0)).points.size() == 4
 
-    # Изменение периметра многоугольника
-    #   изначально он равен сумме длин сторон
-    def test_perimeter1(self):
-        assert self.f.perimeter() == approx(2.0 + sqrt(2.0))
+    # Изменение кол-ва нужных точек многоугольника
+    #   изначально 3
+    def test_cnt1(self):
+        assert self.f.get_cnt() == 3
 
-    #   добавление точки может его изменить
-    def test_perimeter2(self):
-        assert self.f.add(R2Point(1.0, 1.0)).perimeter() == approx(4.0)
+    #   может не измениться
+    def test_cnt2(self):
+        self.f.add(R2Point(1.5, 1.5))
+        assert self.f.get_cnt() == 3
 
-    # Изменение площади многоугольника
-    #   изначально она равна (неориентированной) площади треугольника
-    def test_area1(self):
-        assert self.f.area() == approx(0.5)
+    #   может не измениться
+    def test_cnt3(self):
+        self.f.add(R2Point(-1.5, 0.5))
+        assert self.f.get_cnt() == 3
 
-    #   добавление точки может увеличить площадь
-    def test_area2(self):
-        assert self.f.add(R2Point(1.0, 1.0)).area() == approx(1.0)
+    #   может не измениться
+    def test_cnt4(self):
+        self.f.add(R2Point(4, 4))
+        assert self.f.get_cnt() == 3
+
+    #   может измениться
+    def test_cnt5(self):
+        self.f.add(R2Point(3.7, 3.7))
+        assert self.f.get_cnt() == 4
+
+    #   может измениться
+    def test_cnt6(self):
+        self.f.add(R2Point(1, 4))
+        assert self.f.get_cnt() == 4

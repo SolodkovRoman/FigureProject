@@ -6,7 +6,6 @@ f = Void()
 try:
     while True:
         f = f.add(R2Point())
-        print(f"S = {f.area()}, P = {f.perimeter()}")
-        print()
+        print(f"answer = {f.get_cnt()}")
 except (EOFError, KeyboardInterrupt):
     print("\nStop")
